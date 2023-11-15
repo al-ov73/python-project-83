@@ -1,1 +1,1 @@
-import app
+from page_analyzer.app import index
