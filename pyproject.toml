@@ -3,6 +3,10 @@ name = "hexlet-code"
 version = "0.1.0"
 description = "page analyzer"
 authors = ["al-ov73 <klever1987@yandex.ru>"]
+readme = "README.md"
+packages = [
+  { include = "page_analyzer" },
+]
 
 [tool.poetry.dependencies]
 python = "^3.10"
