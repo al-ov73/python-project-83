@@ -21,7 +21,7 @@ app = Flask(__name__)
 def index():
     return render_template('index.html')
 
-@app.route('/url', methods=['POST'])
+@app.route('/urls', methods=['POST'])
 def create():
     # Get the username and email from the request body
     username = request.form.get('username')
