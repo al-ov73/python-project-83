@@ -21,5 +21,20 @@ app = Flask(__name__)
 def index():
     return render_template('index.html')
 
-if __name__ == "__main__":
-    index()
+@app.route('/url', methods=['POST'])
+def create():
+    # Get the username and email from the request body
+    username = request.form.get('username')
+    email = request.form.get('email')
+ 
+    # Insert the data into the database
+    cur = conn.cursor()
+    cur.execute(
+        "INSERT INTO users (username, email) VALUES (%s, %s)", (username, email))
+    conn.commit()
+ 
+    return 'User created successfully!'
+ 
+ 
+if __name__ == '__main__':
+    app.run()
