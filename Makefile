@@ -9,4 +9,4 @@ start:
 	poetry run gunicorn -w 5 -b 0.0.0.0:$(PORT) page_analyzer:app --error-logfile error.log --log-level debug
 
 export-db:
-	export DATABASE_URL=postgresql://janedoe:mypassword@localhost:5432/mydb
+	export DATABASE_URL=postgresql://alexander:klever@localhost:5432/mydb
