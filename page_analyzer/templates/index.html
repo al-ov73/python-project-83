@@ -21,9 +21,16 @@
 </nav>
 
   </header>
-  
-  
 
+{% if messages %}
+  <ul class=flashes>
+  {% for category, message in messages %}
+    <div class="alert alert-{{ category }}" role="alert">
+      {{ message }}
+    </div>
+  {% endfor %}
+  </ul>
+{% endif %}
   <main class="flex-grow-1">
     <div class="container-lg mt-3">
       <h1></h1>
