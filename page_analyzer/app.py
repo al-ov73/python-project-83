@@ -93,7 +93,7 @@ def create():
     cursor.execute("SELECT * FROM urls ORDER BY created_at DESC")
     urls_list = cursor.fetchall()
     conn.commit()
-    conn.close()
+    cursor.close()
     return render_template(
         'urls.html',
         urls_list=urls_list,
