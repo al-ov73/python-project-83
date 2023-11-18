@@ -35,11 +35,12 @@ def get_url():
     received_url = request.form.get('url')
     if validators.url(received_url):
         parsed_url = urlparse(received_url).hostname
-        created = datetime.now()
+        created = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         cursor = conn.cursor()
         cursor.execute("SELECT name FROM urls")
         in_db = cursor.fetchall()
-
+        conn.commit()
+        cursor = conn.cursor()
         if parsed_url in [url[0] for url in in_db]:
             flash('Url already in list.', 'warning')
         else:
@@ -48,11 +49,19 @@ def get_url():
         cursor.execute("SELECT * FROM urls WHERE name = %s", (parsed_url,))
         received_url = cursor.fetchall()
         id = received_url[0][0]
-        name = received_url[0][1]
         conn.commit()
     else:
         flash('Url is not valid!', 'warning')
         return redirect(url_for('index'))   
+    return redirect(
+        url_for('url_info', id=id),
+    )
+
+@app.post('/urls/<id>/checks')
+def get_url_check(id):
+    created = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    cursor = conn.cursor()
+    cursor.execute("INSERT INTO url_checks  (url_id, status_code, h1, title, description, created_at) VALUES (%s, %s, %s, %s, %s, %s)", (id, 'код ответа', 'h1', 'title', 'description', created))
     return redirect(
         url_for('url_info', id=id),
     )
@@ -65,24 +74,23 @@ def url_info(id):
     received_url = cursor.fetchall()
     name = received_url[0][1]
     created = received_url[0][2]
+    cursor.execute("SELECT * FROM url_checks WHERE url_id = %s ORDER BY created_at DESC", (id,))
+    url_checks = cursor.fetchall()
     return render_template(
         'info.html',
         id=id,
         name=name,
         created=created,
         messages=messages,
+        url_checks=url_checks,
     )
 
 @app.get('/urls')
 def create():
-    print('check1')
     cursor = conn.cursor()
-    print('cheeck2')
     cursor.execute("SELECT * FROM urls ORDER BY created_at DESC")
-    print('check3')
     urls_list = cursor.fetchall()
     conn.commit()
-    print('check4')
     return render_template(
         'urls.html',
         urls_list=urls_list,

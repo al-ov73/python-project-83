@@ -1,4 +1,5 @@
 DROP TABLE IF EXISTS urls;
+DROP TABLE IF EXISTS url_checks;
 
 CREATE TABLE urls (
   id bigint PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
@@ -6,4 +7,12 @@ CREATE TABLE urls (
   created_at TIMESTAMP NOT NULL
 );
 
-INSERT INTO urls (name, created_at) VALUES ('ru.hexlet.io', '2023-11-17 00:57:08.415069')
+CREATE TABLE url_checks (
+  id bigint PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+  url_id bigint REFERENCES urls (id),
+  status_code VARCHAR(255) NOT NULL,
+  h1 VARCHAR(255) NOT NULL,
+  title VARCHAR(255) NOT NULL,
+  description VARCHAR(255) NOT NULL,
+  created_at TIMESTAMP NOT NULL
+);

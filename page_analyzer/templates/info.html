@@ -58,7 +58,7 @@
   </div>
 
     <h2 class="mt-5 mb-3">Проверки</h2>
-    <form method="post" action="/urls/2/checks">
+    <form method="post" action="/urls/{{ id }}/checks">
     <input type="submit" class="btn btn-primary" value="Запустить проверку">
     </form>
     
@@ -75,7 +75,16 @@
       </tr>
     </thead>
       <tbody>
-    
+          {% for url_check in url_checks %}
+            <tr>
+              <td>{{ url_check[0] }}</td>
+              <td>{{ url_check[2] }}</td>
+              <td>{{ url_check[3] }}</td>
+              <td>{{ url_check[4] }}</td>
+              <td>{{ url_check[5] }}</td>
+              <td>{{ url_check[6] }}</td>
+            </tr>
+      {% endfor %}
     </tbody>
     </table>
   </div>
