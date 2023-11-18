@@ -6,4 +6,4 @@ CREATE TABLE urls (
   created_at TIMESTAMP NOT NULL
 );
 
-INSERT INTO urls VALUES (1, 'ru.hexlet.io', '2023-11-17 00:57:08.415069')
+INSERT INTO urls (name, created_at) VALUES ('ru.hexlet.io', '2023-11-17 00:57:08.415069')
