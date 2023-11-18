@@ -19,12 +19,11 @@ DATABASE_URL = os.getenv('DATABASE_URL')
 conn = psycopg2.connect(DATABASE_URL)
 
 app = Flask(__name__)
-app.secret_key = "secret_key"
+app.secret_key = os.getenv('SECRET_KEY')
 
 @app.route('/')
 def index():
     messages = get_flashed_messages(with_categories=True)
-    print(messages)
     return render_template(
         'index.html',
         messages=messages,
@@ -76,11 +75,14 @@ def url_info(id):
 
 @app.get('/urls')
 def create():
+    print('check1')
     cursor = conn.cursor()
+    print('cheeck2')
     cursor.execute("SELECT * FROM urls")
+    print('check3')
     urls_list = cursor.fetchall()
     conn.commit()
- 
+    pritn('check4')
     return render_template(
         'urls.html',
         urls_list=urls_list,
