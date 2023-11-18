@@ -16,7 +16,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 DATABASE_URL = os.getenv('DATABASE_URL')
-conn = psycopg2.connect(DATABASE_URL)
+# conn = psycopg2.connect(DATABASE_URL)
 
 app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY')
@@ -34,6 +34,7 @@ def index():
 def get_url():
     received_url = request.form.get('url')
     if validators.url(received_url):
+        conn = psycopg2.connect(DATABASE_URL)
         parsed_url = urlparse(received_url).hostname
         created = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         cursor = conn.cursor()
@@ -50,11 +51,12 @@ def get_url():
         received_url = cursor.fetchall()
         id = received_url[0][0]
         conn.commit()
+        cursor.close()
+        conn.close()
     else:
         flash('Url is not valid!', 'warning')
         conn.close()
         return redirect(url_for('index'))
-    conn.close()
     return redirect(
         url_for('url_info', id=id),
     )
@@ -62,8 +64,12 @@ def get_url():
 @app.post('/urls/<id>/checks')
 def get_url_check(id):
     created = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    conn = psycopg2.connect(DATABASE_URL)
     cursor = conn.cursor()
     cursor.execute("INSERT INTO url_checks  (url_id, status_code, h1, title, description, created_at) VALUES (%s, %s, %s, %s, %s, %s)", (id, 'код ответа', 'h1', 'title', 'description', created))
+    conn.commit()
+    cursor.close()
+    conn.close()
     return redirect(
         url_for('url_info', id=id),
     )
@@ -71,6 +77,7 @@ def get_url_check(id):
 @app.get('/urls/<id>')
 def url_info(id):
     messages = get_flashed_messages(with_categories=True)
+    conn = psycopg2.connect(DATABASE_URL)
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM urls WHERE id = %s", (id,))
     received_url = cursor.fetchall()
@@ -78,6 +85,9 @@ def url_info(id):
     created = received_url[0][2]
     cursor.execute("SELECT * FROM url_checks WHERE url_id = %s ORDER BY created_at DESC", (id,))
     url_checks = cursor.fetchall()
+    conn.commit()
+    cursor.close()
+    conn.close()
     return render_template(
         'info.html',
         id=id,
@@ -89,11 +99,13 @@ def url_info(id):
 
 @app.get('/urls')
 def create():
+    conn = psycopg2.connect(DATABASE_URL)
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM urls ORDER BY created_at DESC")
     urls_list = cursor.fetchall()
     conn.commit()
     cursor.close()
+    conn.close()
     return render_template(
         'urls.html',
         urls_list=urls_list,
