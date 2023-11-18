@@ -2,7 +2,7 @@ install:
 	poetry install
 
 dev:
-	poetry run flask --app page_analyzer:app run
+	poetry run flask --app page_analyzer:app run --debug
 
 PORT ?= 8000
 start:
@@ -10,3 +10,6 @@ start:
 
 export-db:
 	export DATABASE_URL=postgresql://alexander:klever@localhost:5432/mydb
+
+build:
+	./build.sh
