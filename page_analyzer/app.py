@@ -78,11 +78,11 @@ def create():
     print('check1')
     cursor = conn.cursor()
     print('cheeck2')
-    cursor.execute("SELECT * FROM urls")
+    cursor.execute("SELECT * FROM urls ORDER BY created_at DESC")
     print('check3')
     urls_list = cursor.fetchall()
     conn.commit()
-    pritn('check4')
+    print('check4')
     return render_template(
         'urls.html',
         urls_list=urls_list,
