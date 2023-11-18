@@ -44,15 +44,17 @@ def get_url():
         if parsed_url in [url[0] for url in in_db]:
             flash('Url already in list.', 'warning')
         else:
-            flash('Url was added to list.', 'success')
             cursor.execute("INSERT INTO urls (name, created_at) VALUES (%s, %s)", (parsed_url, created))
+            flash('Url was added to list.', 'success')
         cursor.execute("SELECT * FROM urls WHERE name = %s", (parsed_url,))
         received_url = cursor.fetchall()
         id = received_url[0][0]
         conn.commit()
     else:
         flash('Url is not valid!', 'warning')
-        return redirect(url_for('index'))   
+        conn.close()
+        return redirect(url_for('index'))
+    conn.close()
     return redirect(
         url_for('url_info', id=id),
     )
