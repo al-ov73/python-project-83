@@ -6,3 +6,4 @@ CREATE TABLE urls (
   created_at TIMESTAMP NOT NULL
 );
 
+INSERT INTO urls VALUES (1, ru.hexlet.io, 18.11.2023)
