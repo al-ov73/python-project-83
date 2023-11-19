@@ -42,7 +42,7 @@
     {% for url in urls_list %}
     <tr>
       <td>{{ url[0] }}</td>
-      <td>{{ url[1] }}</td>
+      <td><a href="/urls/{{ url[0] }}">{{ url[1] }}</a></td>
       <td>{{ url[2] }}</td>
       <td>{{ url[3] }}</td>
     </tr>

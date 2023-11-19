@@ -9,17 +9,41 @@ get_flashed_messages
 import validators
 import psycopg2
 import os
-from datetime import date, datetime
+from datetime import datetime
 from urllib.parse import urlparse
 from dotenv import load_dotenv
 import requests
-
+from bs4 import BeautifulSoup
+from requests.adapters import HTTPAdapter
+from requests.packages.urllib3.util.retry import Retry
 
 load_dotenv()
 DATABASE_URL = os.getenv('DATABASE_URL')
 
 app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY')
+
+def get_tags(url):
+    session = requests.Session()
+    retry = Retry(connect=3, backoff_factor=0.5)
+    adapter = HTTPAdapter(max_retries=retry)
+    session.mount('http://', adapter)
+    session.mount('https://', adapter)
+    html_content = session.get(url).text 
+    soup = BeautifulSoup(html_content, 'lxml')
+    if soup.h1:
+        h1 = str(soup.h1.string)
+    else:
+        h1 = ''
+    if soup.title:
+        title = str(soup.title.string) if soup.title.string else ''
+    else:
+        title = ''
+    if soup.find('meta', {'name':'description'}):
+        description = soup.find('meta', {'name':'description'}).get('content')
+    else:
+        description = ''
+    return h1, title, description
 
 @app.route('/')
 def index():
@@ -35,7 +59,7 @@ def get_url():
     received_url = request.form.get('url')
     if validators.url(received_url):
         conn = psycopg2.connect(DATABASE_URL)
-        parsed_url = urlparse(received_url).hostname
+        parsed_url = urlparse(received_url).scheme + '://' + urlparse(received_url).hostname
         created = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         with conn.cursor() as cursor:
             cursor.execute("SELECT name FROM urls")
@@ -66,7 +90,7 @@ def get_url_check(id):
         with conn.cursor() as cursor:
             cursor.execute("SELECT * FROM urls WHERE id = %s", (id,))
             received_url = cursor.fetchall()
-            url = ('https://' + received_url[0][1])
+            url = (received_url[0][1])
         conn.close()
         r = requests.get(url)
         status = r.status_code
@@ -77,12 +101,12 @@ def get_url_check(id):
         )
     created = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     conn = psycopg2.connect(DATABASE_URL)
+    h1, title, description = get_tags(url)
     with conn.cursor() as cursor:
-        cursor.execute("INSERT INTO url_checks  (url_id, status_code, h1, title, description, created_at) VALUES (%s, %s, %s, %s, %s, %s)", (id, status, 'h1', 'title', 'description', created))
+        cursor.execute("INSERT INTO url_checks  (url_id, status_code, h1, title, description, created_at) VALUES (%s, %s, %s, %s, %s, %s)", (id, status, h1, title, description, created))
         conn.commit()
         cursor.execute("select count(url_id) from url_checks where url_id = %s", (id,))
         checks_count = cursor.fetchall()
-        print(checks_count)
         if checks_count[0][0] == 1:
             flash('Url was added to list.', 'success')
     conn.close()
