@@ -46,7 +46,7 @@ def get_url():
             else:
                 cursor.execute("INSERT INTO urls (name, created_at) VALUES (%s, %s)", (parsed_url, created))
                 conn.commit()
-                flash('Url was added to list.', 'success')
+                
             cursor.execute("SELECT * FROM urls WHERE name = %s", (parsed_url,))
             received_url = cursor.fetchall()
             id = received_url[0][0]
@@ -80,6 +80,11 @@ def get_url_check(id):
     with conn.cursor() as cursor:
         cursor.execute("INSERT INTO url_checks  (url_id, status_code, h1, title, description, created_at) VALUES (%s, %s, %s, %s, %s, %s)", (id, status, 'h1', 'title', 'description', created))
         conn.commit()
+        cursor.execute("select count(url_id) from url_checks where url_id = %s", (id,))
+        checks_count = cursor.fetchall()
+        print(checks_count)
+        if checks_count[0][0] == 1:
+            flash('Url was added to list.', 'success')
     conn.close()
     return redirect(
         url_for('url_info', id=id),
@@ -110,7 +115,7 @@ def url_info(id):
 def create():
     conn = psycopg2.connect(DATABASE_URL)
     with conn.cursor() as cursor:
-        cursor.execute("SELECT u.id, u.name, MAX(uc.created_at), uc.status_code FROM urls AS u JOIN url_checks AS uc ON u.id = uc.url_id GROUP BY u.id, u.name, uc.status_code ORDER BY MAX(uc.created_at)")
+        cursor.execute("SELECT u.id, u.name, MAX(uc.created_at), uc.status_code FROM urls AS u JOIN url_checks AS uc ON u.id = uc.url_id GROUP BY u.id, u.name, uc.status_code ORDER BY MAX(uc.created_at) DESC")
         urls_list = cursor.fetchall()
     conn.close()
     return render_template(
