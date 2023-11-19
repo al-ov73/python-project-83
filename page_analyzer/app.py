@@ -71,7 +71,7 @@ def get_url_check(id):
         r = requests.get(url)
         status = r.status_code
     except:
-        flash('Url is not available!', 'warning')
+        flash('Произошла ошибка при проверке', 'warning')
         return redirect(
             url_for('url_info', id=id),
         )
@@ -110,7 +110,7 @@ def url_info(id):
 def create():
     conn = psycopg2.connect(DATABASE_URL)
     with conn.cursor() as cursor:
-        cursor.execute("SELECT * FROM urls ORDER BY created_at DESC")
+        cursor.execute("SELECT u.id, u.name, MAX(uc.created_at), uc.status_code FROM urls AS u JOIN url_checks AS uc ON u.id = uc.url_id GROUP BY u.id, u.name, uc.status_code ORDER BY MAX(uc.created_at)")
         urls_list = cursor.fetchall()
     conn.close()
     return render_template(
