@@ -12,11 +12,11 @@ import os
 from datetime import date, datetime
 from urllib.parse import urlparse
 from dotenv import load_dotenv
+import requests
 
 
 load_dotenv()
 DATABASE_URL = os.getenv('DATABASE_URL')
-# conn = psycopg2.connect(DATABASE_URL)
 
 app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY')
@@ -61,10 +61,24 @@ def get_url():
 
 @app.post('/urls/<id>/checks')
 def get_url_check(id):
+    try:
+        conn = psycopg2.connect(DATABASE_URL)
+        with conn.cursor() as cursor:
+            cursor.execute("SELECT * FROM urls WHERE id = %s", (id,))
+            received_url = cursor.fetchall()
+            url = ('https://' + received_url[0][1])
+        conn.close()
+        r = requests.get(url)
+        status = r.status_code
+    except:
+        flash('Url is not available!', 'warning')
+        return redirect(
+            url_for('url_info', id=id),
+        )
     created = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     conn = psycopg2.connect(DATABASE_URL)
     with conn.cursor() as cursor:
-        cursor.execute("INSERT INTO url_checks  (url_id, status_code, h1, title, description, created_at) VALUES (%s, %s, %s, %s, %s, %s)", (id, 'код ответа', 'h1', 'title', 'description', created))
+        cursor.execute("INSERT INTO url_checks  (url_id, status_code, h1, title, description, created_at) VALUES (%s, %s, %s, %s, %s, %s)", (id, status, 'h1', 'title', 'description', created))
         conn.commit()
     conn.close()
     return redirect(
