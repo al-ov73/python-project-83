@@ -37,38 +37,35 @@ def get_url():
         conn = psycopg2.connect(DATABASE_URL)
         parsed_url = urlparse(received_url).hostname
         created = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        cursor = conn.cursor()
-        cursor.execute("SELECT name FROM urls")
-        in_db = cursor.fetchall()
-        conn.commit()
-        cursor = conn.cursor()
-        if parsed_url in [url[0] for url in in_db]:
-            flash('Url already in list.', 'warning')
-        else:
-            cursor.execute("INSERT INTO urls (name, created_at) VALUES (%s, %s)", (parsed_url, created))
-            flash('Url was added to list.', 'success')
-        cursor.execute("SELECT * FROM urls WHERE name = %s", (parsed_url,))
-        received_url = cursor.fetchall()
-        id = received_url[0][0]
-        conn.commit()
-        cursor.close()
+        with conn.cursor() as cursor:
+            cursor.execute("SELECT name FROM urls")
+            in_db = cursor.fetchall()
+            cursor = conn.cursor()
+            if parsed_url in [url[0] for url in in_db]:
+                flash('Url already in list.', 'warning')
+            else:
+                cursor.execute("INSERT INTO urls (name, created_at) VALUES (%s, %s)", (parsed_url, created))
+                conn.commit()
+                flash('Url was added to list.', 'success')
+            cursor.execute("SELECT * FROM urls WHERE name = %s", (parsed_url,))
+            received_url = cursor.fetchall()
+            id = received_url[0][0]
         conn.close()
+        return redirect(
+            url_for('url_info', id=id),
+        )
     else:
         flash('Url is not valid!', 'warning')
-        conn.close()
         return redirect(url_for('index'))
-    return redirect(
-        url_for('url_info', id=id),
-    )
+
 
 @app.post('/urls/<id>/checks')
 def get_url_check(id):
     created = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     conn = psycopg2.connect(DATABASE_URL)
-    cursor = conn.cursor()
-    cursor.execute("INSERT INTO url_checks  (url_id, status_code, h1, title, description, created_at) VALUES (%s, %s, %s, %s, %s, %s)", (id, 'код ответа', 'h1', 'title', 'description', created))
-    conn.commit()
-    cursor.close()
+    with conn.cursor() as cursor:
+        cursor.execute("INSERT INTO url_checks  (url_id, status_code, h1, title, description, created_at) VALUES (%s, %s, %s, %s, %s, %s)", (id, 'код ответа', 'h1', 'title', 'description', created))
+        conn.commit()
     conn.close()
     return redirect(
         url_for('url_info', id=id),
@@ -78,15 +75,13 @@ def get_url_check(id):
 def url_info(id):
     messages = get_flashed_messages(with_categories=True)
     conn = psycopg2.connect(DATABASE_URL)
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM urls WHERE id = %s", (id,))
-    received_url = cursor.fetchall()
-    name = received_url[0][1]
-    created = received_url[0][2]
-    cursor.execute("SELECT * FROM url_checks WHERE url_id = %s ORDER BY created_at DESC", (id,))
-    url_checks = cursor.fetchall()
-    conn.commit()
-    cursor.close()
+    with conn.cursor() as cursor:
+        cursor.execute("SELECT * FROM urls WHERE id = %s", (id,))
+        received_url = cursor.fetchall()
+        name = received_url[0][1]
+        created = received_url[0][2]
+        cursor.execute("SELECT * FROM url_checks WHERE url_id = %s ORDER BY created_at DESC", (id,))
+        url_checks = cursor.fetchall()
     conn.close()
     return render_template(
         'info.html',
@@ -100,11 +95,9 @@ def url_info(id):
 @app.get('/urls')
 def create():
     conn = psycopg2.connect(DATABASE_URL)
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM urls ORDER BY created_at DESC")
-    urls_list = cursor.fetchall()
-    conn.commit()
-    cursor.close()
+    with conn.cursor() as cursor:
+        cursor.execute("SELECT * FROM urls ORDER BY created_at DESC")
+        urls_list = cursor.fetchall()
     conn.close()
     return render_template(
         'urls.html',
