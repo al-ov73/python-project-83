@@ -1,15 +1,16 @@
 from flask import (
-Flask, redirect,
-render_template,
-request,
-flash,
-url_for,
-get_flashed_messages
+    Flask,
+    redirect,
+    render_template,
+    request,
+    flash,
+    url_for,
+    get_flashed_messages
 )
 import validators
 import psycopg2
 import os
-from datetime import datetime, date
+from datetime import date
 from urllib.parse import urlparse
 from dotenv import load_dotenv
 import requests
@@ -23,17 +24,18 @@ DATABASE_URL = os.getenv('DATABASE_URL')
 app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY')
 
+
 def response_from(url):
     session = requests.Session()
     retry = Retry(connect=3, backoff_factor=0.5)
     adapter = HTTPAdapter(max_retries=retry)
     session.mount('http://', adapter)
     session.mount('https://', adapter)
-    return session.get(url) 
-    
-    
+    return session.get(url)
+
+
 def get_tags(url):
-    html_content = response_from(url).text 
+    html_content = response_from(url).text
     soup = BeautifulSoup(html_content, "html.parser")
     if soup.h1:
         h1 = str(soup.h1.string)
@@ -43,11 +45,12 @@ def get_tags(url):
         title = str(soup.title.string) if soup.title.string else ''
     else:
         title = ''
-    if soup.find('meta', {'name':'description'}):
-        description = soup.find('meta', {'name':'description'}).get('content')
+    if soup.find('meta', {'name': 'description'}):
+        description = soup.find('meta', {'name': 'description'}).get('content')
     else:
         description = ''
     return h1, title, description
+
 
 @app.route('/')
 def index():
@@ -97,30 +100,30 @@ def get_url():
 
 @app.post('/urls/<id>/checks')
 def get_url_check(id):
+    conn = psycopg2.connect(DATABASE_URL)
+    with conn.cursor() as cursor:
+        cursor.execute("SELECT * FROM urls WHERE id = %s", (id,))
+        received_url = cursor.fetchall()
+        url = (received_url[0][1])
+    conn.close()
     try:
-        conn = psycopg2.connect(DATABASE_URL)
-        with conn.cursor() as cursor:
-            cursor.execute("SELECT * FROM urls WHERE id = %s", (id,))
-            received_url = cursor.fetchall()
-            url = (received_url[0][1])
-        conn.close()
-    except:
+        r = response_from(url)
+    except requests.exceptions.ConnectionError:
         flash('Произошла ошибка при проверке', 'warning')
         return redirect(
             url_for('url_info', id=id),
         )
-    r = response_from(url)
     status = r.status_code
     created = date.today()
     conn = psycopg2.connect(DATABASE_URL)
     h1, title, description = get_tags(url)
-    with conn.cursor() as cursor:
-        cursor.execute('''
-                       INSERT INTO url_checks (
-                           url_id, status_code, h1, title, description, created_at
-                       )
-                       VALUES (%s, %s, %s, %s, %s, %s)
-                       ''', (id, status, h1, title, description, created))
+    with conn.cursor() as cur:
+        cur.execute('''
+                    INSERT INTO url_checks (
+                        url_id, status_code, h1, title, description, created_at
+                    )
+                    VALUES (%s, %s, %s, %s, %s, %s)
+                    ''', (id, status, h1, title, description, created))
         conn.commit()
     conn.close()
     flash('Страница успешно проверена', 'success')
@@ -128,6 +131,7 @@ def get_url_check(id):
         url_for('url_info', id=id),
         code=302,
     )
+
 
 @app.get('/urls/<id>')
 def url_info(id):
@@ -154,6 +158,7 @@ def url_info(id):
         url_checks=url_checks,
     )
 
+
 @app.get('/urls')
 def create():
     conn = psycopg2.connect(DATABASE_URL)
@@ -171,7 +176,7 @@ def create():
         'urls.html',
         urls_list=urls_list,
     )
- 
+
 
 if __name__ == '__main__':
     app.run()
