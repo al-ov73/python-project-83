@@ -1,0 +1,146 @@
+[2023-11-19 15:47:30 +0400] [45308] [DEBUG] Current configuration:
+  config: ./gunicorn.conf.py
+  wsgi_app: None
+  bind: ['0.0.0.0:8000']
+  backlog: 2048
+  workers: 5
+  worker_class: sync
+  threads: 1
+  worker_connections: 1000
+  max_requests: 0
+  max_requests_jitter: 0
+  timeout: 30
+  graceful_timeout: 30
+  keepalive: 2
+  limit_request_line: 4094
+  limit_request_fields: 100
+  limit_request_field_size: 8190
+  reload: False
+  reload_engine: auto
+  reload_extra_files: []
+  spew: False
+  check_config: False
+  print_config: False
+  preload_app: False
+  sendfile: None
+  reuse_port: False
+  chdir: /home/alexander/python-project-83
+  daemon: False
+  raw_env: []
+  pidfile: None
+  worker_tmp_dir: None
+  user: 1000
+  group: 1000
+  umask: 0
+  initgroups: False
+  tmp_upload_dir: None
+  secure_scheme_headers: {'X-FORWARDED-PROTOCOL': 'ssl', 'X-FORWARDED-PROTO': 'https', 'X-FORWARDED-SSL': 'on'}
+  forwarded_allow_ips: ['127.0.0.1']
+  accesslog: None
+  disable_redirect_access_to_syslog: False
+  access_log_format: %(h)s %(l)s %(u)s %(t)s "%(r)s" %(s)s %(b)s "%(f)s" "%(a)s"
+  errorlog: error.log
+  loglevel: debug
+  capture_output: False
+  logger_class: gunicorn.glogging.Logger
+  logconfig: None
+  logconfig_dict: {}
+  logconfig_json: None
+  syslog_addr: udp://localhost:514
+  syslog: False
+  syslog_prefix: None
+  syslog_facility: user
+  enable_stdio_inheritance: False
+  statsd_host: None
+  dogstatsd_tags: 
+  statsd_prefix: 
+  proc_name: None
+  default_proc_name: page_analyzer:app
+  pythonpath: None
+  paste: None
+  on_starting: <function OnStarting.on_starting at 0x7f92e9920af0>
+  on_reload: <function OnReload.on_reload at 0x7f92e9920c10>
+  when_ready: <function WhenReady.when_ready at 0x7f92e9920d30>
+  pre_fork: <function Prefork.pre_fork at 0x7f92e9920e50>
+  post_fork: <function Postfork.post_fork at 0x7f92e9920f70>
+  post_worker_init: <function PostWorkerInit.post_worker_init at 0x7f92e9921090>
+  worker_int: <function WorkerInt.worker_int at 0x7f92e99211b0>
+  worker_abort: <function WorkerAbort.worker_abort at 0x7f92e99212d0>
+  pre_exec: <function PreExec.pre_exec at 0x7f92e99213f0>
+  pre_request: <function PreRequest.pre_request at 0x7f92e9921510>
+  post_request: <function PostRequest.post_request at 0x7f92e99215a0>
+  child_exit: <function ChildExit.child_exit at 0x7f92e99216c0>
+  worker_exit: <function WorkerExit.worker_exit at 0x7f92e99217e0>
+  nworkers_changed: <function NumWorkersChanged.nworkers_changed at 0x7f92e9921900>
+  on_exit: <function OnExit.on_exit at 0x7f92e9921a20>
+  ssl_context: <function NewSSLContext.ssl_context at 0x7f92e9921b40>
+  proxy_protocol: False
+  proxy_allow_ips: ['127.0.0.1']
+  keyfile: None
+  certfile: None
+  ssl_version: 2
+  cert_reqs: 0
+  ca_certs: None
+  suppress_ragged_eofs: True
+  do_handshake_on_connect: False
+  ciphers: None
+  raw_paste_global_conf: []
+  strip_header_spaces: False
+[2023-11-19 15:47:30 +0400] [45308] [INFO] Starting gunicorn 21.2.0
+[2023-11-19 15:47:30 +0400] [45308] [DEBUG] Arbiter booted
+[2023-11-19 15:47:30 +0400] [45308] [INFO] Listening at: http://0.0.0.0:8000 (45308)
+[2023-11-19 15:47:30 +0400] [45308] [INFO] Using worker: sync
+[2023-11-19 15:47:30 +0400] [45312] [INFO] Booting worker with pid: 45312
+[2023-11-19 15:47:30 +0400] [45313] [INFO] Booting worker with pid: 45313
+[2023-11-19 15:47:30 +0400] [45314] [INFO] Booting worker with pid: 45314
+[2023-11-19 15:47:30 +0400] [45315] [INFO] Booting worker with pid: 45315
+[2023-11-19 15:47:30 +0400] [45316] [INFO] Booting worker with pid: 45316
+[2023-11-19 15:47:30 +0400] [45308] [DEBUG] 5 workers
+[2023-11-19 15:47:35 +0400] [45315] [DEBUG] GET /
+[2023-11-19 15:47:35 +0400] [45316] [DEBUG] GET /favicon.ico
+[2023-11-19 15:47:36 +0400] [45312] [DEBUG] GET /urls
+[2023-11-19 15:47:36,897] ERROR in app: Exception on /urls [GET]
+Traceback (most recent call last):
+  File "/home/alexander/python-project-83/.venv/lib/python3.10/site-packages/flask/app.py", line 1455, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/alexander/python-project-83/.venv/lib/python3.10/site-packages/flask/app.py", line 869, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/home/alexander/python-project-83/.venv/lib/python3.10/site-packages/flask/app.py", line 867, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/alexander/python-project-83/.venv/lib/python3.10/site-packages/flask/app.py", line 852, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+  File "/home/alexander/python-project-83/page_analyzer/app.py", line 113, in create
+    cursor.execute("SELECT urls.id AS url_id, name, COUNT(url_checks.created_at), status_code FROM urls JOIN url_checks ON urls.id = url_checks.url_id GROUP BY urls.id, name, status_code ORDER BY url_checks.created_at DESC")
+psycopg2.errors.GroupingError: column "url_checks.created_at" must appear in the GROUP BY clause or be used in an aggregate function
+LINE 1: ...l_id GROUP BY urls.id, name, status_code ORDER BY url_checks...
+                                                             ^
+
+[2023-11-19 15:47:40 +0400] [45316] [DEBUG] GET /urls
+[2023-11-19 15:47:40,785] ERROR in app: Exception on /urls [GET]
+Traceback (most recent call last):
+  File "/home/alexander/python-project-83/.venv/lib/python3.10/site-packages/flask/app.py", line 1455, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/alexander/python-project-83/.venv/lib/python3.10/site-packages/flask/app.py", line 869, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/home/alexander/python-project-83/.venv/lib/python3.10/site-packages/flask/app.py", line 867, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/alexander/python-project-83/.venv/lib/python3.10/site-packages/flask/app.py", line 852, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+  File "/home/alexander/python-project-83/page_analyzer/app.py", line 113, in create
+    cursor.execute("SELECT urls.id AS url_id, name, COUNT(url_checks.created_at), status_code FROM urls JOIN url_checks ON urls.id = url_checks.url_id GROUP BY urls.id, name, status_code ORDER BY url_checks.created_at DESC")
+psycopg2.errors.GroupingError: column "url_checks.created_at" must appear in the GROUP BY clause or be used in an aggregate function
+LINE 1: ...l_id GROUP BY urls.id, name, status_code ORDER BY url_checks...
+                                                             ^
+
+[2023-11-19 15:48:09 +0400] [45308] [CRITICAL] WORKER TIMEOUT (pid:45312)
+[2023-11-19 15:48:09 +0400] [45312] [INFO] Worker exiting (pid: 45312)
+[2023-11-19 15:48:09 +0400] [45308] [ERROR] Worker (pid:45312) exited with code 1
+[2023-11-19 15:48:09 +0400] [45308] [ERROR] Worker (pid:45312) exited with code 1.
+[2023-11-19 15:48:09 +0400] [45460] [INFO] Booting worker with pid: 45460
+[2023-11-19 15:48:26 +0400] [45308] [INFO] Handling signal: int
+[2023-11-19 15:48:26 +0400] [45460] [INFO] Worker exiting (pid: 45460)
+[2023-11-19 15:48:26 +0400] [45313] [INFO] Worker exiting (pid: 45313)
+[2023-11-19 15:48:26 +0400] [45316] [INFO] Worker exiting (pid: 45316)
+[2023-11-19 15:48:26 +0400] [45315] [INFO] Worker exiting (pid: 45315)
+[2023-11-19 15:48:26 +0400] [45314] [INFO] Worker exiting (pid: 45314)
+[2023-11-19 15:48:27 +0400] [45308] [INFO] Shutting down: Master

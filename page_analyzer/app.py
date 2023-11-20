@@ -9,7 +9,7 @@ get_flashed_messages
 import validators
 import psycopg2
 import os
-from datetime import datetime
+from datetime import datetime, date
 from urllib.parse import urlparse
 from dotenv import load_dotenv
 import requests
@@ -23,14 +23,18 @@ DATABASE_URL = os.getenv('DATABASE_URL')
 app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY')
 
-def get_tags(url):
+def response_from(url):
     session = requests.Session()
     retry = Retry(connect=3, backoff_factor=0.5)
     adapter = HTTPAdapter(max_retries=retry)
     session.mount('http://', adapter)
     session.mount('https://', adapter)
-    html_content = session.get(url).text 
-    soup = BeautifulSoup(html_content, 'lxml')
+    return session.get(url) 
+    
+    
+def get_tags(url):
+    html_content = response_from(url).text 
+    soup = BeautifulSoup(html_content, "html.parser")
     if soup.h1:
         h1 = str(soup.h1.string)
     else:
@@ -59,27 +63,35 @@ def get_url():
     received_url = request.form.get('url')
     if validators.url(received_url):
         conn = psycopg2.connect(DATABASE_URL)
-        parsed_url = urlparse(received_url).scheme + '://' + urlparse(received_url).hostname
-        created = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        scheme = urlparse(received_url).scheme
+        hostname = urlparse(received_url).hostname
+        parsed_url = (scheme + '://' + hostname)
+        created = date.today()
         with conn.cursor() as cursor:
             cursor.execute("SELECT name FROM urls")
             in_db = cursor.fetchall()
             cursor = conn.cursor()
             if parsed_url in [url[0] for url in in_db]:
-                flash('Url already in list.', 'warning')
+                flash('Страница уже существует', 'warning')
             else:
-                cursor.execute("INSERT INTO urls (name, created_at) VALUES (%s, %s)", (parsed_url, created))
+                cursor.execute('''
+                               INSERT INTO urls (name, created_at)
+                               VALUES (%s, %s)
+                               ''', (parsed_url, created))
                 conn.commit()
-                
-            cursor.execute("SELECT * FROM urls WHERE name = %s", (parsed_url,))
+                flash('Страница успешно добавлена', 'success')
+            cursor.execute('''
+                           SELECT * FROM urls WHERE name = %s
+                           ''', (parsed_url,))
             received_url = cursor.fetchall()
             id = received_url[0][0]
         conn.close()
         return redirect(
             url_for('url_info', id=id),
+            code=302,
         )
     else:
-        flash('Url is not valid!', 'warning')
+        flash('Некорректный URL', 'warning')
         return redirect(url_for('index'))
 
 
@@ -92,26 +104,29 @@ def get_url_check(id):
             received_url = cursor.fetchall()
             url = (received_url[0][1])
         conn.close()
-        r = requests.get(url)
-        status = r.status_code
     except:
         flash('Произошла ошибка при проверке', 'warning')
         return redirect(
             url_for('url_info', id=id),
         )
-    created = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    r = response_from(url)
+    status = r.status_code
+    created = date.today()
     conn = psycopg2.connect(DATABASE_URL)
     h1, title, description = get_tags(url)
     with conn.cursor() as cursor:
-        cursor.execute("INSERT INTO url_checks  (url_id, status_code, h1, title, description, created_at) VALUES (%s, %s, %s, %s, %s, %s)", (id, status, h1, title, description, created))
+        cursor.execute('''
+                       INSERT INTO url_checks (
+                           url_id, status_code, h1, title, description, created_at
+                       )
+                       VALUES (%s, %s, %s, %s, %s, %s)
+                       ''', (id, status, h1, title, description, created))
         conn.commit()
-        cursor.execute("select count(url_id) from url_checks where url_id = %s", (id,))
-        checks_count = cursor.fetchall()
-        if checks_count[0][0] == 1:
-            flash('Url was added to list.', 'success')
     conn.close()
+    flash('Страница успешно проверена', 'success')
     return redirect(
         url_for('url_info', id=id),
+        code=302,
     )
 
 @app.get('/urls/<id>')
@@ -123,7 +138,11 @@ def url_info(id):
         received_url = cursor.fetchall()
         name = received_url[0][1]
         created = received_url[0][2]
-        cursor.execute("SELECT * FROM url_checks WHERE url_id = %s ORDER BY created_at DESC", (id,))
+        cursor.execute('''
+                       SELECT * FROM url_checks
+                       WHERE url_id = %s
+                       ORDER BY id DESC
+                       ''', (id,))
         url_checks = cursor.fetchall()
     conn.close()
     return render_template(
@@ -139,7 +158,13 @@ def url_info(id):
 def create():
     conn = psycopg2.connect(DATABASE_URL)
     with conn.cursor() as cursor:
-        cursor.execute("SELECT u.id, u.name, MAX(uc.created_at), uc.status_code FROM urls AS u JOIN url_checks AS uc ON u.id = uc.url_id GROUP BY u.id, u.name, uc.status_code ORDER BY MAX(uc.created_at) DESC")
+        cursor.execute('''
+                       SELECT u.id, u.name, MAX(uc.created_at), uc.status_code
+                       FROM urls AS u LEFT JOIN url_checks AS uc
+                       ON u.id = uc.url_id
+                       GROUP BY u.id, u.name, uc.status_code
+                       ORDER BY u.id DESC
+                       ''')
         urls_list = cursor.fetchall()
     conn.close()
     return render_template(
