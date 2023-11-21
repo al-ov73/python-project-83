@@ -136,7 +136,7 @@ def get_url_check(id):
         code=302,
     )
 
-@app.get('/urls/<id>')
+@app.get('/urls/<int:id>')
 def url_info(id):
     messages = get_flashed_messages(with_categories=True)
     conn = psycopg2.connect(DATABASE_URL)
