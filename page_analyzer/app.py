@@ -52,9 +52,11 @@ def get_tags(url):
 @app.route('/')
 def index():
     messages = get_flashed_messages(with_categories=True)
+    check_message = 'Проверить' 
     return render_template(
         'index.html',
         messages=messages,
+        check_message=check_message,
         )
 
 
@@ -92,7 +94,11 @@ def get_url():
         )
     else:
         flash('Некорректный URL', 'warning')
-        return redirect(url_for('index'), code=422)
+        return redirect(
+            url_for('index'),
+            code=422,
+            check_message=received_url,
+        )
 
 
 @app.post('/urls/<id>/checks')
