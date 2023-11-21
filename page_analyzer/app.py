@@ -128,11 +128,12 @@ def get_url_check(id):
                        ''', (id, status, h1, title, description, created))
         conn.commit()
     conn.close()
-    flash('Страница успешно проверена', 'success')
-    return redirect(
-        url_for('url_info', id=id),
-        code=200,
-    )
+    if int(status) != 200:
+        flash('Страница успешно проверена', 'success')
+        return redirect(
+            url_for('url_info', id=id),
+            code=200,
+        )
 
 @app.get('/urls/<int:id>')
 def url_info(id):
