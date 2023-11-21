@@ -4,7 +4,9 @@ render_template,
 request,
 flash,
 url_for,
-get_flashed_messages
+get_flashed_messages,
+make_response,
+abort,
 )
 import validators
 import psycopg2
@@ -50,9 +52,9 @@ def get_tags(url):
     return h1, title, description
 
 @app.route('/')
-def index():
+def get_init_url():
     messages = get_flashed_messages(with_categories=True)
-    check_message = 'Проверить' 
+    check_message = 'https://www.example.com' 
     return render_template(
         'index.html',
         messages=messages,
@@ -94,9 +96,13 @@ def get_url():
         )
     else:
         flash('Некорректный URL', 'warning')
-        return redirect(
-            url_for('index'),
-        )
+
+        # messages = get_flashed_messages(with_categories=True)
+
+        return render_template('index.html',
+                        check_message=received_url,
+                        messages=get_flashed_messages(with_categories=True)
+                    ), 422
 
 
 @app.post('/urls/<id>/checks')
