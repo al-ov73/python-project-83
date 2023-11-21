@@ -92,13 +92,9 @@ def get_url():
         conn.close()
         return redirect(
             url_for('url_info', id=id),
-
         )
     else:
         flash('Некорректный URL', 'warning')
-
-        # messages = get_flashed_messages(with_categories=True)
-
         return render_template('index.html',
                         check_message=received_url,
                         messages=get_flashed_messages(with_categories=True)
@@ -141,7 +137,7 @@ def get_url_check(id):
             url_for('url_info', id=id),
         )
 
-@app.route('/urls/<id>')
+@app.route('/urls/<int:id>')
 def url_info(id):
     messages = get_flashed_messages(with_categories=True)
     conn = psycopg2.connect(DATABASE_URL)
