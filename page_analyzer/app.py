@@ -29,7 +29,7 @@ def response_from(url):
     adapter = HTTPAdapter(max_retries=retry)
     session.mount('http://', adapter)
     session.mount('https://', adapter)
-    return session.get(url) 
+    return session.get(url)
     
     
 def get_tags(url):
@@ -95,8 +95,6 @@ def get_url():
         flash('Некорректный URL', 'warning')
         return redirect(
             url_for('index'),
-            code=422,
-
         )
 
 
@@ -108,13 +106,14 @@ def get_url_check(id):
         received_url = cursor.fetchall()
         url = (received_url[0][1])
     conn.close()
-    r = response_from(url)
-    status = r.status_code
-    if int(status) != 200:
+    try:
+        r = response_from(url)
+    except requests.exceptions.ConnectionError:
         flash('Произошла ошибка при проверке', 'warning')
         return redirect(
             url_for('url_info', id=id),
         )
+    status = r.status_code
     created = date.today()
     conn = psycopg2.connect(DATABASE_URL)
     h1, title, description = get_tags(url)
@@ -127,14 +126,15 @@ def get_url_check(id):
                        ''', (id, status, h1, title, description, created))
         conn.commit()
     conn.close()
-    if int(status) == 200:
+    print('check!')
+    print(status, type(status))
+    if status == 200:
         flash('Страница успешно проверена', 'success')
         return redirect(
             url_for('url_info', id=id),
-            code=200,
         )
 
-@app.get('/urls/<int:id>')
+@app.route('/urls/<id>')
 def url_info(id):
     messages = get_flashed_messages(with_categories=True)
     conn = psycopg2.connect(DATABASE_URL)
