@@ -116,8 +116,6 @@ def get_url_check(id):
         return redirect(
             url_for('url_info', id=id),
         )
-    r = response_from(url)
-    status = r.status_code
     created = date.today()
     conn = psycopg2.connect(DATABASE_URL)
     h1, title, description = get_tags(url)
