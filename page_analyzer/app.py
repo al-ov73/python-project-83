@@ -128,7 +128,7 @@ def get_url_check(id):
                        ''', (id, status, h1, title, description, created))
         conn.commit()
     conn.close()
-    if int(status) != 200:
+    if int(status) == 200:
         flash('Страница успешно проверена', 'success')
         return redirect(
             url_for('url_info', id=id),
