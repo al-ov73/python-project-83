@@ -26,12 +26,12 @@ app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY')
 
 def response_from(url):
-    session = requests.Session()
-    retry = Retry(connect=3, backoff_factor=0.5)
-    adapter = HTTPAdapter(max_retries=retry)
-    session.mount('http://', adapter)
-    session.mount('https://', adapter)
-    return session.get(url)
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+        return response
+    except requests.exceptions.RequestException:
+        flash('Произошла ошибка при проверке', 'danger')
     
     
 def get_tags(url):
@@ -52,7 +52,7 @@ def get_tags(url):
     return h1, title, description
 
 @app.route('/')
-def get_init_url():
+def index():
     messages = get_flashed_messages(with_categories=True)
     check_message = 'https://www.example.com' 
     return render_template(
@@ -109,10 +109,8 @@ def get_url_check(id):
         received_url = cursor.fetchall()
         url = (received_url[0][1])
     conn.close()
-    try:
-        r = response_from(url)
-    except requests.exceptions.ConnectionError:
-        flash('Произошла ошибка при проверке', 'warning')
+    r = response_from(url)
+    if not r:
         return redirect(
             url_for('url_info', id=id),
         )
@@ -163,7 +161,7 @@ def url_info(id):
     )
 
 @app.get('/urls')
-def create():
+def get_urls_list():
     conn = psycopg2.connect(DATABASE_URL)
     with conn.cursor() as cursor:
         cursor.execute('''
@@ -180,6 +178,16 @@ def create():
         urls_list=urls_list,
     )
  
+ 
+@app.errorhandler(404)
+def page_not_found(error):
+    return render_template('error/404.html'), 404
+
+
+@app.errorhandler(500)
+def server_error(error):
+    return render_template('error/500.html'), 500
+
 
 if __name__ == '__main__':
     app.run()
