@@ -27,7 +27,11 @@ app.secret_key = os.getenv('SECRET_KEY')
 
 def response_from(url):
     try:
-        response = requests.get(url)
+        s = requests.Session()
+        print(url)
+        response = s.get(url)
+        # response = requests.get(url)
+        print('check3')
         response.raise_for_status()
         return response
     except requests.exceptions.RequestException:
@@ -109,7 +113,9 @@ def get_url_check(id):
         received_url = cursor.fetchall()
         url = (received_url[0][1])
     conn.close()
+    print('check1')
     r = response_from(url)
+    print('check2')
     if not r:
         return redirect(
             url_for('url_info', id=id),
