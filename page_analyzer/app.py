@@ -96,9 +96,9 @@ def get_url():
         flash('Некорректный URL', 'warning')
         return redirect(
             url_for('index'),
-            code=422,
+
             check_message=received_url,
-        )
+        ), 422
 
 
 @app.post('/urls/<id>/checks')
