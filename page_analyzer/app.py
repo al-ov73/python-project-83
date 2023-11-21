@@ -133,7 +133,7 @@ def get_url_check(id):
     flash('Страница успешно проверена', 'success')
     return redirect(
         url_for('url_info', id=id),
-        code=302,
+        code=200,
     )
 
 @app.get('/urls/<int:id>')
