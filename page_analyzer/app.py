@@ -97,14 +97,15 @@ def get_url():
 
 @app.post('/urls/<id>/checks')
 def get_url_check(id):
-    try:
-        conn = psycopg2.connect(DATABASE_URL)
-        with conn.cursor() as cursor:
-            cursor.execute("SELECT * FROM urls WHERE id = %s", (id,))
-            received_url = cursor.fetchall()
-            url = (received_url[0][1])
-        conn.close()
-    except:
+    r = response_from(url)
+    status = r.status_code
+    conn = psycopg2.connect(DATABASE_URL)
+    with conn.cursor() as cursor:
+        cursor.execute("SELECT * FROM urls WHERE id = %s", (id,))
+        received_url = cursor.fetchall()
+        url = (received_url[0][1])
+    conn.close()
+    if int(status) != 200:
         flash('Произошла ошибка при проверке', 'warning')
         return redirect(
             url_for('url_info', id=id),
