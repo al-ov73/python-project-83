@@ -90,7 +90,7 @@ def get_url():
         conn.close()
         return redirect(
             url_for('url_info', id=id),
-            code=200,
+
         )
     else:
         flash('Некорректный URL', 'warning')
