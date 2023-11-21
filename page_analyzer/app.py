@@ -92,7 +92,7 @@ def get_url():
         )
     else:
         flash('Некорректный URL', 'warning')
-        return redirect(url_for('index'))
+        return redirect(url_for('index'), code=422)
 
 
 @app.post('/urls/<id>/checks')
