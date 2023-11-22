@@ -37,7 +37,7 @@ def index():
         'index.html',
         messages=messages,
         check_message=check_message,
-        )
+    )
 
 
 @app.post('/urls')
@@ -46,10 +46,10 @@ def get_url():
     if not validate(received_url):
         flash('Некорректный URL', 'warning')
         return render_template(
-                        'index.html',
-                        check_message=received_url,
-                        messages=get_flashed_messages(with_categories=True)
-                    ), 422
+            'index.html',
+            check_message=received_url,
+            messages=get_flashed_messages(with_categories=True)
+        ), 422
     parsed_url = normilyze(received_url)
     urls = get_urls_names()
     if parsed_url in urls:
