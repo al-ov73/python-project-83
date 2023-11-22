@@ -10,3 +10,6 @@ start:
 
 build:
 	./build.sh
+
+lint:
+	poetry run flake8 page_analyzer
