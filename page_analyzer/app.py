@@ -1,5 +1,6 @@
 from flask import (
-    Flask, redirect,
+    Flask,
+    redirect,
     render_template,
     request,
     flash,
@@ -22,7 +23,6 @@ import os
 
 
 load_dotenv()
-DATABASE_URL = os.getenv('DATABASE_URL')
 
 
 app = Flask(__name__)
