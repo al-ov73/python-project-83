@@ -87,7 +87,7 @@ def add_check(id, status):
     url, _ = get_url_by_id(id)
     h1, title, description = get_tags(url)
     conn = psycopg2.connect(DATABASE_URL)
-    with conn.cur() as cur:
+    with conn.cursor() as cur:
         created = date.today()
         cur.execute('''
                     INSERT INTO url_checks (
